@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive Worksheet – School Objects</title>
+<style>
+  :root{--bg:#f6f7fb;--card:#ffffff;--accent:#1d4ed8;--ok:#16a34a;--bad:#dc2626;}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;background:var(--bg);color:#111;}
+  header{padding:20px 16px;text-align:center;background:#fff;box-shadow:0 1px 0 rgba(0,0,0,.06);position:sticky;top:0;z-index:20;}
+  h1{margin:0;font-size:22px;}
+  main{max-width:980px;margin:24px auto;padding:0 16px 48px;}
+  .card{background:var(--card);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.06);padding:20px;margin-bottom:20px;}
+  .row{display:flex;flex-wrap:wrap;gap:16px;align-items:stretch}
+  .col{flex:1 1 320px}
+  button{border:0;border-radius:12px;padding:12px 16px;font-weight:600;cursor:pointer}
+  .primary{background:var(--accent);color:#fff}
+  .ghost{background:#eef2ff;color:#1e293b}
+  .pill{display:inline-block;padding:6px 10px;border-radius:999px;background:#e2e8f0;font-size:12px;margin-left:8px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .item{background:#f8fafc;border:2px dashed #cbd5e1;border-radius:14px;padding:16px;text-align:center;transition:all .2s}
+  .item.correct{border-color:var(--ok);background:#ecfdf5}
+  .item.wrong{border-color:var(--bad);background:#fef2f2}
+  .objects{display:grid;grid-template-columns:repeat(4, minmax(80px,1fr));gap:12px;align-items:stretch;justify-items:center}
+  .obj{user-select:none;background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:10px;width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:46px;position:relative}
+  .obj span{position:absolute;bottom:8px;left:8px;font-size:12px;opacity:.6}
+  .dropzone{display:flex;align-items:center;justify-content:center;font-weight:700;min-height:64px}
+  .label{padding:8px 12px;background:#e0f2fe;border:2px solid #7dd3fc;border-radius:10px;font-weight:700;cursor:grab}
+  #toast{position:fixed;bottom:18px;right:18px;background:#111;color:#fff;padding:12px 14px;border-radius:12px;opacity:0;transform:translateY(10px);transition:all .2s;pointer-events:none}
+  #toast.show{opacity:1;transform:translateY(0)}
+  .score{font-weight:800}
+  .hint{font-size:13px;opacity:.7}
+</style>
+</head>
+<body>
+<header>
+  <h1>Interactive Worksheet – School Objects <span class="pill">Listening &amp; Vocabulary</span></h1>
+</header>
+<main>
+  <section class="card" id="intro">
+    <div class="row">
+      <div class="col">
+        <h2>Warm-up</h2>
+        <p>Tap <strong>Play</strong>. Listen and <strong>click</strong> the correct object.</p>
+        <div class="hint">If audio doesn't play, unmute your device and interact once with the page.</div>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <button class="primary" id="playPrompt">▶️ Play</button>
+          <button class="ghost" id="nextPrompt">➡️ Next</button>
+          <div class="pill">Score: <span class="score" id="scoreA">0</span>/8</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="objects" id="objects">
+          <!-- Objects with emoji icons for clarity -->
+          <div class="obj" data-name="book" tabindex="0" aria-label="book">📘<span>book</span></div>
+          <div class="obj" data-name="pencil" tabindex="0" aria-label="pencil">✏️<span>pencil</span></div>
+          <div class="obj" data-name="ruler" tabindex="0" aria-label="ruler">📏<span>ruler</span></div>
+          <div class="obj" data-name="chair" tabindex="0" aria-label="chair">🪑<span>chair</span></div>
+          <div class="obj" data-name="desk" tabindex="0" aria-label="desk">🛋️<span>desk</span></div>
+          <div class="obj" data-name="board" tabindex="0" aria-label="board">🧮<span>board</span></div>
+          <div class="obj" data-name="pen" tabindex="0" aria-label="pen">🖊️<span>pen</span></div>
+          <div class="obj" data-name="school bag" tabindex="0" aria-label="school bag">🎒<span>school bag</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Drag &amp; Drop</h2>
+    <p>Drag the <strong>word</strong> to the correct <strong>picture</strong>. Then press <strong>Check</strong>.</p>
+    <div class="row">
+      <div class="col">
+        <div class="grid" id="labels">
+          <div class="label" draggable="true" data-name="book">book</div>
+          <div class="label" draggable="true" data-name="pencil">pencil</div>
+          <div class="label" draggable="true" data-name="ruler">ruler</div>
+          <div class="label" draggable="true" data-name="chair">chair</div>
+          <div class="label" draggable="true" data-name="desk">desk</div>
+          <div class="label" draggable="true" data-name="board">board</div>
+          <div class="label" draggable="true" data-name="pen">pen</div>
+          <div class="label" draggable="true" data-name="school bag">school bag</div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="grid" id="drops">
+          <div class="item dropzone" data-name="book">📘</div>
+          <div class="item dropzone" data-name="pencil">✏️</div>
+          <div class="item dropzone" data-name="ruler">📏</div>
+          <div class="item dropzone" data-name="chair">🪑</div>
+          <div class="item dropzone" data-name="desk">🛋️</div>
+          <div class="item dropzone" data-name="board">🧮</div>
+          <div class="item dropzone" data-name="pen">🖊️</div>
+          <div class="item dropzone" data-name="school bag">🎒</div>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:10px;align-items:center;">
+          <button class="primary" id="checkB">✅ Check</button>
+          <button class="ghost" id="resetB">♻️ Reset</button>
+          <div class="pill">Score: <span class="score" id="scoreB">0</span>/8</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Mini-dialogue (speaking)</h2>
+    <p>Build and practice: <em>“What is this?” — “It’s a ….”</em> Click a word to speak it.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap" id="dialogue">
+      <button class="ghost say">What is this?</button>
+      <button class="ghost say">It's a book.</button>
+      <button class="ghost say">It's a pencil.</button>
+      <button class="ghost say">It's a ruler.</button>
+      <button class="ghost say">It's a chair.</button>
+      <button class="ghost say">It's a desk.</button>
+      <button class="ghost say">It's a board.</button>
+      <button class="ghost say">It's a pen.</button>
+      <button class="ghost say">It's a school bag.</button>
+    </div>
+  </section>
+
+  </main>
+
+<div id="toast">Great!</div>
+
+<script>
+// Utility: toast
+const toast = (msg) => {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 1200);
+};
+
+// Speech synthesis helper
+const speak = (text) => {
+  try {
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95;
+    u.pitch = 1;
+    u.lang = 'en-US';
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  } catch(e) {
+    console.warn('Speech synthesis not available.');
+  }
+};
+
+// Activity A: Listening & Click
+const prompts = [
+  "Click the book.",
+  "Click the pencil.",
+  "Click the ruler.",
+  "Click the chair.",
+  "Click the desk.",
+  "Click the board.",
+  "Click the pen.",
+  "Click the school bag."
+];
+let order = [...prompts.keys()];
+// shuffle
+order.sort(()=>Math.random()-0.5);
+let idx = 0;
+let scoreA = 0;
+const scoreAEl = document.getElementById('scoreA');
+
+function currentTargetName(){
+  const p = prompts[order[idx]];
+  return p.replace('Click the ', '').replace('.', '');
+}
+
+function playCurrent(){
+  speak(prompts[order[idx]]);
+}
+
+document.getElementById('playPrompt').addEventListener('click', playCurrent);
+document.getElementById('nextPrompt').addEventListener('click', ()=>{
+  idx = (idx + 1) % order.length;
+  playCurrent();
+});
+
+document.querySelectorAll('.obj').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const want = currentTargetName();
+    const got = el.getAttribute('data-name');
+    if (want === got){
+      scoreA = Math.min(8, scoreA + 1);
+      scoreAEl.textContent = scoreA;
+      toast('✓ Correct!');
+      idx = (idx + 1) % order.length;
+      setTimeout(playCurrent, 350);
+      el.style.outline = '3px solid #16a34a';
+      setTimeout(()=> el.style.outline = '', 600);
+    } else {
+      toast('Try again');
+      el.style.outline = '3px solid #dc2626';
+      setTimeout(()=> el.style.outline = '', 600);
+    }
+  });
+});
+
+// Activity B: Drag & Drop
+let scoreB = 0;
+const scoreBEl = document.getElementById('scoreB');
+let dragged = null;
+
+document.querySelectorAll('.label').forEach(l => {
+  l.addEventListener('dragstart', e => { dragged = l; l.style.opacity = .6; });
+  l.addEventListener('dragend', e => { dragged = null; l.style.opacity = 1; });
+});
+
+document.querySelectorAll('.dropzone').forEach(z => {
+  z.addEventListener('dragover', e => e.preventDefault());
+  z.addEventListener('drop', e => {
+    e.preventDefault();
+    if (!dragged) return;
+    z.textContent = '';
+    z.appendChild(dragged);
+  });
+});
+
+document.getElementById('checkB').addEventListener('click', ()=>{
+  let correct = 0;
+  document.querySelectorAll('.dropzone').forEach(z => {
+    const name = z.getAttribute('data-name');
+    const child = z.querySelector('.label');
+    if (child && child.getAttribute('data-name') === name){
+      z.classList.remove('wrong'); z.classList.add('correct'); correct++;
+    } else {
+      z.classList.remove('correct'); z.classList.add('wrong');
+    }
+  });
+  scoreB = correct;
+  scoreBEl.textContent = scoreB;
+  toast('You got ' + correct + ' / 8');
+});
+
+document.getElementById('resetB').addEventListener('click', ()=>{
+  scoreB = 0; scoreBEl.textContent = scoreB;
+  document.querySelectorAll('.dropzone').forEach(z => {
+    z.classList.remove('correct','wrong');
+    const label = z.querySelector('.label');
+    if (label) document.getElementById('labels').appendChild(label);
+    z.textContent = z.getAttribute('data-name')==='school bag' ? '🎒' :
+      z.getAttribute('data-name')==='book' ? '📘' :
+      z.getAttribute('data-name')==='pencil' ? '✏️' :
+      z.getAttribute('data-name')==='ruler' ? '📏' :
+      z.getAttribute('data-name')==='chair' ? '🪑' :
+      z.getAttribute('data-name')==='desk' ? '🛋️' :
+      z.getAttribute('data-name')==='board' ? '🧮' :
+      '🖊️';
+  });
+});
+
+// Dialogue buttons speak
+document.querySelectorAll('.say').forEach(b=> b.addEventListener('click', ()=> speak(b.textContent)));
+</script>
+</body>
+</html>
